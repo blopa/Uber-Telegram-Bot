@@ -13,7 +13,7 @@ TELEGRAM_KEY = sys.argv[1]
 BOTAN_TOKEN = sys.argv[2]
 MAIN, LOCATION = range(2)
 UBER_URL = "http://blopa.github.io/uber.html?"  # TODO use "uber://?" or "https://m.uber.com/ul/?" ?
-CMDS = ["/setpickup", "/setdropoff", "/setpickanddrop", "/applycuppon"]
+CMDS = ["/setpickup", "/setdropoff", "/setpickanddrop", "/applycoupon"]
 SCMDS = ["/start", "/about", "/help"]
 CMD = {}
 PICK = {}
@@ -65,7 +65,7 @@ def mainmenu(bot, update):
         CMD[usr.id] = CMDS[2]
         update.message.reply_text(reply_msg.format('pickup location first'), reply_markup=reply)
         return LOCATION
-    elif str(msg).startswith(CMDS[3]):  # /applycuppon
+    elif str(msg).startswith(CMDS[3]):  # /applycoupon
         link = UBER_URL + "c=" + UBER_PROMO
         update.message.reply_text('Awesome. Just click <a href="{}">HERE</a> to open the Uber app'.format(link), parse_mode=ParseMode.HTML)
         return MAIN
