@@ -50,7 +50,7 @@ def mainmenu(bot, update):
     usr = update.message.from_user
     msg = update.message.text
     reply = ReplyKeyboardMarkup([[KeyboardButton(text="Current Location", request_location=True)]], one_time_keyboard=True)
-    reply_msg = "Alright, send me the {}. You can either select send me the location now or simply select 'Current Location' from the menu."
+    reply_msg = "Alright, send me the {}. You can either select send me the location now or simply select 'Current Location' from the menu. Or /cancel to cancel."
     if str(msg).startswith(CMDS[0]):  # /setpickup
         CMD[usr.id] = CMDS[0]
         update.message.reply_text(reply_msg.format('pickup location'), reply_markup=reply)
@@ -117,7 +117,7 @@ def getlocation(bot, update):
                 PICK[usr.id] = latiLong
                 if loc:
                     update.message.reply_text(reply_msg.format('pickup') + loc)
-                update.message.reply_text("Now send me the dropoff location or simply select 'Current Location' from the menu.")
+                update.message.reply_text("Now send me the dropoff location or simply select 'Current Location' from the menu. Or /cancel to cancel.")
                 return LOCATION
         else:
             update.message.reply_text("Something went wrong, please try again.")
