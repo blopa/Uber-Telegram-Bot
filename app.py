@@ -4,7 +4,6 @@ from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, Conv
 from api import botan
 from geopy.geocoders import Nominatim
 import random
-import urllib
 import logging
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -81,10 +80,9 @@ def getlocation(bot, update):
         except Exception:
             loc = ""
         reply_msg = "The {} location set to:\n"
-        uber_msg = 'All set! Just click <a href="{}">here</a> to open the Uber app.'
-        basic_params = dict(client_id=UBER_KEY, action="setPickup")
+        uber_msg = 'All set! Just click <a href="{}">HERE</a> to open the Uber app.'
         if CMD[usr.id] == CMDS[0]:  # /setpickup
-            link = UBER_URL + "pickup[latitude]={}&pickup[longitude]={}&".format(location.latitude, location.longitude) + urllib.urlencode(basic_params)
+            link = UBER_URL + "p={}".format(str(location.latitude) + "," + str(location.longitude))
             update.message.reply_text(uber_msg.format(link), parse_mode=ParseMode.HTML, reply_markup=ReplyKeyboardHide())
             if loc:
                 update.message.reply_text(reply_msg.format('pickup') + loc)
@@ -93,7 +91,7 @@ def getlocation(bot, update):
             except Exception as e:
                 logger.exception(e)
         elif CMD[usr.id] == CMDS[1]:  # /setdropoff
-            link = UBER_URL + "pickup=my_location&dropoff[latitude]={}&dropoff[longitude]={}&".format(location.latitude, location.longitude) + urllib.urlencode(basic_params)
+            link = UBER_URL + "d={}".format(str(location.latitude) + "," + str(location.longitude))
             update.message.reply_text(uber_msg.format(link), parse_mode=ParseMode.HTML, reply_markup=ReplyKeyboardHide())
             if loc:
                 update.message.reply_text(reply_msg.format('dropoff') + loc)
@@ -103,13 +101,12 @@ def getlocation(bot, update):
                 logger.exception(e)
         elif CMD[usr.id] == CMDS[2]:  # /setpickanddrop
             if usr.id in PICK:
-                pick = PICK[usr.id].split(",")
                 try:
                     loc2 = geolocator.reverse(PICK[usr.id]).address
                 except Exception:
                     loc2 = ""
+                link = UBER_URL + "p={}&d={}".format(PICK[usr.id], str(location.latitude) + "," + str(location.longitude))
                 del PICK[usr.id]
-                link = UBER_URL + "pickup[latitude]={}&pickup[longitude]={}&dropoff[latitude]={}&dropoff[longitude]={}&".format(pick[0], pick[1], location.latitude, location.longitude) + urllib.urlencode(basic_params)
                 update.message.reply_text(uber_msg.format(link), parse_mode=ParseMode.HTML, reply_markup=ReplyKeyboardHide())
                 if loc and loc2:
                     update.message.reply_text(reply_msg.format('pickup') + loc2 + "\n\nAnd dropoff location set to:\n" + loc)
