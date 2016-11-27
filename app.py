@@ -128,7 +128,7 @@ def getlocation(bot, update):
 
 
 def cancel(bot, update):
-    update.message.reply_text("Ok, canceled.")
+    update.message.reply_text("Ok, canceled.", reply_markup=ReplyKeyboardHide())
     return MAIN
 
 
