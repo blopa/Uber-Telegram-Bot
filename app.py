@@ -39,7 +39,7 @@ def start(bot, update):
     if str(msg).startswith(SCMDS[0]):
         update.message.reply_text("Hello, I'm a bot that helps you order a Uber. You can {}, {} or {}.".format(*CMDS))
     elif str(msg).startswith(SCMDS[1]):
-        update.message.reply_text("This will help you setting up a pickup and/or dropoff location for Uber.\n\nThis bot was made by @PabloMontenegro and it is in development, you can check the source code at https://github.com/blopa/uber-telegram-bot.\n\nPull requests are welcome.")  # TODO
+        update.message.reply_text("This bot will help you setting up a pickup and/or dropoff location for Uber.\n\nThis bot was made by @PabloMontenegro and it is in development, you can check the source code at https://github.com/blopa/uber-telegram-bot.\n\nPull requests are welcome.")  # TODO
     elif str(msg).startswith(SCMDS[2]):
         update.message.reply_text("I'm a bot that helps you order a Uber. Try using {}, {} or {}.".format(*CMDS))
     else:
