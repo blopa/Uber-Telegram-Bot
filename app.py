@@ -10,8 +10,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 TELEGRAM_KEY = sys.argv[1]
-UBER_KEY = sys.argv[2]
-BOTAN_TOKEN = sys.argv[3]
+BOTAN_TOKEN = sys.argv[2]
 MAIN, LOCATION = range(2)
 UBER_URL = "http://blopa.github.io/uber.html?"  # TODO use "uber://?"
 CMDS = ["/setpickup", "/setdropoff", "/setpickanddrop"]
