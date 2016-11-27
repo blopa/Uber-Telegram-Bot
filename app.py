@@ -4,19 +4,22 @@ from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, Conv
 from api import botan
 from geopy.geocoders import Nominatim
 import random
+import urllib
 import logging
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 TELEGRAM_KEY = sys.argv[1]
-BOTAN_TOKEN = sys.argv[2]
+UBER_KEY = sys.argv[2]
+BOTAN_TOKEN = sys.argv[3]
 MAIN, LOCATION = range(2)
-UBER_URL = "http://blopa.github.io/uber.html?"  # TODO use "uber://?"
-CMDS = ["/setpickup", "/setdropoff", "/setpickanddrop"]
+UBER_URL = "https://m.uber.com/ul/?"  # TODO use "uber://?" ?
+CMDS = ["/setpickup", "/setdropoff", "/setpickanddrop", "/applycuppon"]
 SCMDS = ["/start", "/about", "/help"]
 CMD = {}
 PICK = {}
+UBER_PROMO = "uberKoehUsaMeuCodigo"
 
 
 def main():
@@ -37,9 +40,9 @@ def main():
 def start(bot, update):
     msg = update.message.text
     if str(msg).startswith(SCMDS[0]):
-        update.message.reply_text("Hello, I'm a bot that helps you order a Uber. You can {}, {} or {}.".format(*CMDS))
+        update.message.reply_text("Hello, I'm a bot that helps you order a Uber. You can {}, {}, {} or {}.".format(*CMDS))
     elif str(msg).startswith(SCMDS[1]):
-        update.message.reply_text("This bot will help you setting up a pickup and/or dropoff location for Uber.\n\nThis bot was made by @PabloMontenegro and it is in development, you can check the source code at https://github.com/blopa/uber-telegram-bot.\n\nPull requests are welcome.")  # TODO
+        update.message.reply_text("This bot will help you setting up a pickup and/or dropoff location for Uber.\n\nDon't have Uber? Install it now: https://uber.com/invite/uberKoehUsaMeuCodigo. \n\nThis bot was made by @PabloMontenegro and it is in development, you can check the source code at https://github.com/blopa/uber-telegram-bot.\n\nPull requests are welcome.")  # TODO
     elif str(msg).startswith(SCMDS[2]):
         update.message.reply_text("I'm a bot that helps you order a Uber. Try using {}, {} or {}.".format(*CMDS))
     else:
@@ -64,6 +67,11 @@ def mainmenu(bot, update):
         CMD[usr.id] = CMDS[2]
         update.message.reply_text(reply_msg.format('pickup location first'), reply_markup=reply)
         return LOCATION
+    elif str(msg).startswith(CMDS[3]):  # /applycuppon
+        params = dict(client_id=UBER_KEY, action="applyPromo")
+        link = UBER_URL + "promo=" + UBER_PROMO + "&" + urllib.urlencode(params)
+        update.message.reply_text('Awesome. Just click <a href="{}">HERE</a> to open the Uber app'.format(link), parse_mode=ParseMode.HTML)
+        return MAIN
 
     if str(msg) in SCMDS:
         return start(bot, update)
@@ -84,8 +92,9 @@ def getlocation(bot, update):
             loc = ""
         reply_msg = "The {} location set to:\n"
         uber_msg = 'All set! Just click <a href="{}">HERE</a> to open the Uber app.'
+        basic_params = dict(client_id=UBER_KEY, action="setPickup")
         if CMD[usr.id] == CMDS[0]:  # /setpickup
-            link = UBER_URL + "p={}".format(str(location.latitude) + "," + str(location.longitude))
+            link = UBER_URL + "pickup[latitude]={}&pickup[longitude]={}&".format(location.latitude, location.longitude) + urllib.urlencode(basic_params)
             update.message.reply_text(uber_msg.format(link), parse_mode=ParseMode.HTML, reply_markup=ReplyKeyboardHide())
             if loc:
                 update.message.reply_text(reply_msg.format('pickup') + loc)
@@ -94,7 +103,7 @@ def getlocation(bot, update):
             except Exception as e:
                 logger.exception(e)
         elif CMD[usr.id] == CMDS[1]:  # /setdropoff
-            link = UBER_URL + "d={}".format(str(location.latitude) + "," + str(location.longitude))
+            link = UBER_URL + "pickup=my_location&dropoff[latitude]={}&dropoff[longitude]={}&".format(location.latitude, location.longitude) + urllib.urlencode(basic_params)
             update.message.reply_text(uber_msg.format(link), parse_mode=ParseMode.HTML, reply_markup=ReplyKeyboardHide())
             if loc:
                 update.message.reply_text(reply_msg.format('dropoff') + loc)
@@ -104,12 +113,13 @@ def getlocation(bot, update):
                 logger.exception(e)
         elif CMD[usr.id] == CMDS[2]:  # /setpickanddrop
             if usr.id in PICK:
+                pick = PICK[usr.id].split(",")
                 try:
                     loc2 = geolocator.reverse(PICK[usr.id]).address
                 except Exception:
                     loc2 = ""
-                link = UBER_URL + "p={}&d={}".format(PICK[usr.id], str(location.latitude) + "," + str(location.longitude))
                 del PICK[usr.id]
+                link = UBER_URL + "pickup[latitude]={}&pickup[longitude]={}&dropoff[latitude]={}&dropoff[longitude]={}&".format(pick[0], pick[1], location.latitude, location.longitude) + urllib.urlencode(basic_params)
                 update.message.reply_text(uber_msg.format(link), parse_mode=ParseMode.HTML, reply_markup=ReplyKeyboardHide())
                 if loc and loc2:
                     update.message.reply_text(reply_msg.format('pickup') + loc2 + "\n\nAnd dropoff location set to:\n" + loc)
