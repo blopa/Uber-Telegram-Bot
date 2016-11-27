@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 TELEGRAM_KEY = sys.argv[1]
 UBER_KEY = sys.argv[2]
-# BOTAN_TOKEN = sys.argv[3]
+BOTAN_TOKEN = sys.argv[3]
 MAIN, LOCATION = range(2)
 UBER_URL = "http://blopa.github.io/uber.html?"  # TODO use "uber://?"
 CMDS = ["/setpickup", "/setdropoff", "/setpickanddrop"]
@@ -25,7 +25,7 @@ def main():
     updater = Updater(TELEGRAM_KEY)
     dispatcher = updater.dispatcher
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler(Filters.command, start)],
+        entry_points=[MessageHandler(Filters.command, start)],
         states={
             MAIN: [MessageHandler(Filters.command, mainmenu)],
             LOCATION: [MessageHandler(Filters.location, getlocation)]
@@ -86,14 +86,22 @@ def getlocation(bot, update):
         basic_params = dict(client_id=UBER_KEY, action="setPickup")
         if CMD[usr.id] == CMDS[0]:  # /setpickup
             link = UBER_URL + "pickup[latitude]={}&pickup[longitude]={}&".format(location.latitude, location.longitude) + urllib.urlencode(basic_params)
-            update.message.reply_text(uber_msg.format(link), parse_mode=ParseMode.HTML)
+            update.message.reply_text(uber_msg.format(link), parse_mode=ParseMode.HTML, reply_markup=ReplyKeyboardHide())
             if loc:
-                update.message.reply_text(reply_msg.format('pickup') + loc, reply_markup=ReplyKeyboardHide())
+                update.message.reply_text(reply_msg.format('pickup') + loc)
+            try:
+                botan.track(BOTAN_TOKEN, update.message.from_user.id, {0: 'set pickup'}, 'set pickup')
+            except Exception as e:
+                logger.exception(e)
         elif CMD[usr.id] == CMDS[1]:  # /setdropoff
             link = UBER_URL + "pickup=my_location&dropoff[latitude]={}&dropoff[longitude]={}&".format(location.latitude, location.longitude) + urllib.urlencode(basic_params)
-            update.message.reply_text(uber_msg.format(link), parse_mode=ParseMode.HTML)
+            update.message.reply_text(uber_msg.format(link), parse_mode=ParseMode.HTML, reply_markup=ReplyKeyboardHide())
             if loc:
-                update.message.reply_text(reply_msg.format('dropoff') + loc, reply_markup=ReplyKeyboardHide())
+                update.message.reply_text(reply_msg.format('dropoff') + loc)
+            try:
+                botan.track(BOTAN_TOKEN, update.message.from_user.id, {0: 'set dropoff'}, 'set dropoff')
+            except Exception as e:
+                logger.exception(e)
         elif CMD[usr.id] == CMDS[2]:  # /setpickanddrop
             if usr.id in PICK:
                 pick = PICK[usr.id].split(",")
@@ -103,9 +111,13 @@ def getlocation(bot, update):
                     loc2 = ""
                 del PICK[usr.id]
                 link = UBER_URL + "pickup[latitude]={}&pickup[longitude]={}&dropoff[latitude]={}&dropoff[longitude]={}&".format(pick[0], pick[1], location.latitude, location.longitude) + urllib.urlencode(basic_params)
-                update.message.reply_text(uber_msg.format(link), parse_mode=ParseMode.HTML)
+                update.message.reply_text(uber_msg.format(link), parse_mode=ParseMode.HTML, reply_markup=ReplyKeyboardHide())
                 if loc and loc2:
-                    update.message.reply_text(reply_msg.format('pickup') + loc2 + "\n\nAnd dropoff location set to:\n" + loc, reply_markup=ReplyKeyboardHide())
+                    update.message.reply_text(reply_msg.format('pickup') + loc2 + "\n\nAnd dropoff location set to:\n" + loc)
+                try:
+                    botan.track(BOTAN_TOKEN, update.message.from_user.id, {0: 'set pickup and dropoff'}, 'set pickup and dropoff')
+                except Exception as e:
+                    logger.exception(e)
             else:
                 PICK[usr.id] = latiLong
                 if loc:
