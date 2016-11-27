@@ -14,6 +14,7 @@ BOTAN_TOKEN = sys.argv[2]
 MAIN, LOCATION = range(2)
 UBER_URL = "http://blopa.github.io/uber.html?"  # TODO use "uber://?"
 CMDS = ["/setpickup", "/setdropoff", "/setpickanddrop"]
+SCMDS = ["/start", "/about", "/help"]
 CMD = {}
 PICK = {}
 
@@ -35,11 +36,11 @@ def main():
 
 def start(bot, update):
     msg = update.message.text
-    if str(msg).startswith("/start"):
+    if str(msg).startswith(SCMDS[0]):
         update.message.reply_text("Hello, I'm a bot that helps you order a Uber. You can {}, {} or {}.".format(*CMDS))
-    elif str(msg).startswith("/about"):
+    elif str(msg).startswith(SCMDS[1]):
         update.message.reply_text("This will help you setting up a pickup and/or dropoff location for Uber.\n\nThis bot was made by @PabloMontenegro and it is in development, you can check the source code at https://github.com/blopa/uber-telegram-bot.\n\nPull requests are welcome.")  # TODO
-    elif str(msg).startswith("/help"):
+    elif str(msg).startswith(SCMDS[2]):
         update.message.reply_text("I'm a bot that helps you order a Uber. Try using {}, {} or {}.".format(*CMDS))
     else:
         return mainmenu(bot, update)
@@ -63,6 +64,9 @@ def mainmenu(bot, update):
         CMD[usr.id] = CMDS[2]
         update.message.reply_text(reply_msg.format('pickup location first'), reply_markup=reply)
         return LOCATION
+
+    if str(msg) in SCMDS:
+        return start(bot, update)
 
     update.message.reply_text("Sorry, I didn't undestanded that. Try sending {}.".format(random.choice(CMDS)))
     return MAIN
