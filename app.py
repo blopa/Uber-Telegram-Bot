@@ -1,5 +1,4 @@
 import sys
-from telegram import Bot
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardHide, KeyboardButton, ParseMode)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, ConversationHandler)
 from api import botan
