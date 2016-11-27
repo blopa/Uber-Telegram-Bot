@@ -67,7 +67,7 @@ def mainmenu(bot, update):
         return LOCATION
     elif str(msg).startswith(CMDS[3]):  # /applycuppon
         link = UBER_URL + "c=" + UBER_PROMO
-        update.message.reply_text('Awesome. Just click <a href="{}">HERE</a> to open the Uber app'.format(link))
+        update.message.reply_text('Awesome. Just click <a href="{}">HERE</a> to open the Uber app'.format(link), parse_mode=ParseMode.HTML)
         return MAIN
 
     if str(msg) in SCMDS:
